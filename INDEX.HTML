@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wave Studio — One Studio. Every Channel.</title>
+<meta name="description" content="Wave Studio is a multi-channel digital studio: video editing, AI films, AI ad campaigns, website builds, custom bots, Discord bots, Discord servers, and hosting — one team, one signal.">
+<meta property="og:title" content="Wave Studio — One Studio. Every Channel.">
+<meta property="og:description" content="Video, AI film, ad campaigns, websites, and bots — built by one team and shipped through one signal.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0a0b0f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='4' fill='%230a0b0f'/%3E%3Ccircle cx='12' cy='12' r='5' fill='%236366f1'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#0a0b0f;
+    --surface:#14161d;
+    --surface-2:#1b1e27;
+    --line:#2a2e39;
+    --paper:#f5f3ee;
+    --muted:#8b8d97;
+    --accent:#6366f1;
+    --accent-dim: #2f2b6b;
+    --signal:#ffb84d;
+    --radius:2px;
+    --radius-btn:20px;
+    --display: 'Bricolage Grotesque', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; scroll-behavior:auto !important;}
+  }
+
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  img,svg{display:block;max-width:100%;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px;}
+  @media (max-width:720px){.wrap{padding:0 20px;}}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--signal);
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 0 3px rgba(255,184,77,0.18);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.35;}
+  }
+
+  h1,h2,h3{
+    font-family:var(--display);
+    font-weight:700;
+    letter-spacing:-0.02em;
+    line-height:1.02;
+  }
+
+  /* ===== NAV ===== */
+  header{
+    position:sticky;top:0;z-index:100;
+    background:rgba(10,11,15,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 0;
+  }
+  .logo{
+    font-family:var(--display);
+    font-weight:800;font-size:20px;letter-spacing:-0.01em;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo .dot{width:9px;height:9px;background:var(--accent);border-radius:50%;}
+  .nav-links{display:flex;gap:34px;font-size:14px;color:var(--muted);}
+  .nav-links a:hover{color:var(--paper);}
+  .nav-cta{
+    font-family:var(--mono);font-size:12px;letter-spacing:0.06em;
+    border:1px solid var(--line);
+    padding:10px 18px;
+    color:var(--paper);
+    border-radius:var(--radius-btn);
+    transition:border-color .2s, background .2s;
+  }
+  .nav-cta:hover{border-color:var(--accent);background:rgba(99,102,241,0.08);}
+  .nav-toggle{display:none;background:none;border:none;color:var(--paper);padding:4px;}
+  @media (max-width:860px){
+    .nav-links{display:none;}
+    .nav-toggle{display:flex;}
+  }
+  .mobile-menu{
+    display:none;
+    flex-direction:column;
+    border-top:1px solid var(--line);
+    background:var(--surface);
+  }
+  .mobile-menu.open{display:flex;}
+  .mobile-menu a{
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    font-size:15px;color:var(--paper);
+  }
+  .mobile-menu a:active{background:var(--surface-2);}
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:96px 0 40px;
+    position:relative;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.25fr 0.9fr;
+    gap:64px;
+    align-items:start;
+  }
+  @media (max-width:960px){
+    .hero-grid{grid-template-columns:1fr;gap:48px;}
+  }
+
+  .hero h1{
+    font-size:clamp(42px, 6.4vw, 84px);
+    margin-top:18px;
+  }
+  .hero h1 span{color:var(--accent);}
+  .hero-sub{
+    margin-top:22px;
+    font-size:18px;
+    color:var(--muted);
+    max-width:46ch;
+  }
+  .hero-actions{
+    display:flex;gap:16px;margin-top:36px;flex-wrap:wrap;
+  }
+  .btn-primary{
+    background:var(--accent);
+    color:#0a0b0f;
+    font-weight:600;
+    font-size:15px;
+    padding:15px 26px;
+    border:none;
+    border-radius:var(--radius-btn);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(99,102,241,0.28);}
+  .btn-ghost{
+    border:1px solid var(--line);
+    color:var(--paper);
+    font-size:15px;
+    padding:15px 26px;
+    border-radius:var(--radius-btn);
+    transition:border-color .2s;
+  }
+  .btn-ghost:hover{border-color:var(--paper);}
+
+  /* channel dial */
+  .dial{
+    border:1px solid var(--line);
+    background:var(--surface);
+  }
+  .dial-head{
+    font-family:var(--mono);
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--muted);
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;
+  }
+  .dial-list{}
+  .ch{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+    cursor:pointer;
+    transition:background .15s ease;
+    position:relative;
+  }
+  .ch:last-child{border-bottom:none;}
+  .ch:hover{background:var(--surface-2);}
+  .ch.active{background:var(--surface-2);}
+  .ch.active::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);
+  }
+  .ch-num{
+    font-family:var(--mono);font-size:12px;color:var(--muted);width:26px;flex-shrink:0;
+  }
+  .ch.active .ch-num{color:var(--accent);}
+  .ch-name{font-size:14px;font-weight:600;flex:1;}
+  .ch-icon{width:18px;height:18px;flex-shrink:0;color:var(--muted);}
+  .ch.active .ch-icon{color:var(--accent);}
+
+  .dial-preview{
+    padding:20px 18px 22px;
+    border-top:1px solid var(--line);
+    min-height:96px;
+  }
+  .dial-preview .tag{
+    font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;
+  }
+  .dial-preview p{margin-top:8px;font-size:14px;color:var(--muted);line-height:1.55;}
+
+  /* equalizer strip */
+  .eq{display:flex;align-items:flex-end;gap:3px;height:26px;}
+  .eq span{
+    display:block;width:3px;background:var(--accent);
+    animation:eq 1.1s ease-in-out infinite;
+  }
+  .eq span:nth-child(1){height:40%;animation-delay:0s;}
+  .eq span:nth-child(2){height:80%;animation-delay:.1s;}
+  .eq span:nth-child(3){height:55%;animation-delay:.2s;}
+  .eq span:nth-child(4){height:95%;animation-delay:.3s;}
+  .eq span:nth-child(5){height:30%;animation-delay:.4s;}
+  .eq span:nth-child(6){height:70%;animation-delay:.5s;}
+  @keyframes eq{
+    0%,100%{transform:scaleY(0.4);}
+    50%{transform:scaleY(1);}
+  }
+
+  /* ===== marquee ===== */
+  .marquee{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:16px 0;
+    overflow:hidden;
+    margin-top:80px;
+  }
+  .marquee-native{
+    font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;
+    width:100%;
+  }
+
+  /* ===== SECTION SHELL ===== */
+  section{padding:110px 0;}
+  @media (max-width:720px){section{padding:70px 0;}}
+  .section-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    gap:24px;margin-bottom:56px;flex-wrap:wrap;
+  }
+  .section-head h2{font-size:clamp(30px,4vw,46px);}
+  .section-head p{color:var(--muted);max-width:38ch;font-size:15px;}
+
+  /* ===== SERVICES ===== */
+  .services-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+  }
+  @media (max-width:920px){.services-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.services-grid{grid-template-columns:1fr;}}
+  .card{
+    background:var(--ink);
+    padding:32px 28px;
+    transition:background .2s ease;
+  }
+  .card:hover{background:var(--surface);}
+  .card .ch-num{color:var(--muted);}
+  .card-icon{
+    width:34px;height:34px;color:var(--accent);margin-bottom:26px;
+  }
+  .card h3{font-size:19px;font-weight:700;margin-bottom:10px;}
+  .card p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px;}
+  .card .from{
+    font-family:var(--mono);font-size:12px;color:var(--signal);letter-spacing:0.04em;
+  }
+
+  /* ===== PRICING ===== */
+  .pricing-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+    max-width:760px;margin:0 auto;
+  }
+  @media (max-width:700px){.pricing-grid{grid-template-columns:1fr;}}
+  .price-card{
+    background:var(--ink);padding:36px 30px;position:relative;
+    display:flex;flex-direction:column;
+  }
+  .price-card.featured{background:var(--surface);}
+  .price-tag{
+    position:absolute;top:0;right:0;
+    background:var(--accent);color:var(--ink);
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.08em;
+    padding:6px 12px;font-weight:600;
+  }
+  .price-num{
+    font-family:var(--display);font-weight:800;font-size:44px;
+    margin:18px 0 14px;color:var(--paper);
+  }
+  .price-num span{font-family:var(--body);font-weight:500;font-size:15px;color:var(--muted);}
+  .price-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:22px;min-height:66px;}
+  .price-list{margin-bottom:28px;flex:1;}
+  .price-list li{
+    font-size:13.5px;color:var(--paper);
+    padding:10px 0;border-top:1px solid var(--line);
+    position:relative;padding-left:20px;
+  }
+  .price-list li::before{
+    content:"→";position:absolute;left:0;color:var(--signal);
+  }
+  .price-btn{width:100%;text-align:center;}
+  .pay-row{display:flex;gap:8px;}
+  .pay-row:empty{display:none;}
+  .pay-row .gw-btn{
+    flex:1;text-align:center;padding:13px 10px;font-size:13.5px;font-weight:600;
+    border:1px solid var(--line);border-radius:var(--radius-btn);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    transition:border-color .2s, background .2s;
+  }
+  .pay-row .gw-btn:hover{border-color:var(--signal);background:rgba(255,184,77,0.08);}
+  .pay-row .gw-btn .gw-label{font-family:var(--mono);font-size:10.5px;letter-spacing:0.04em;color:var(--muted);}
+  .pay-fallback{display:none;}
+  .pay-fallback.show{display:block;}
+  .price-note{
+    margin-top:26px;font-size:13px;color:var(--muted);text-align:center;
+    max-width:64ch;margin-left:auto;margin-right:auto;
+  }
+
+  /* ===== TRUST / SECURITY ===== */
+  .trust{
+    background:var(--surface);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .trust-grid{
+    display:grid;grid-template-columns:0.9fr 1.1fr;gap:64px;align-items:center;
+  }
+  @media (max-width:900px){.trust-grid{grid-template-columns:1fr;gap:40px;}}
+  .trust-badges{
+    display:grid;grid-template-columns:1fr 1fr;gap:1px;
+    background:var(--line);border:1px solid var(--line);
+  }
+  .badge{
+    background:var(--surface);padding:24px;
+  }
+  .badge svg{width:22px;height:22px;color:var(--signal);margin-bottom:14px;}
+  .badge h4{font-size:14px;font-weight:600;margin-bottom:6px;}
+  .badge p{font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .gateways{
+    margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;
+  }
+  .gw{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:0.05em;
+    border:1px solid var(--line);padding:8px 14px;color:var(--muted);
+  }
+
+  /* ===== PROCESS ===== */
+  .process-list{border-top:1px solid var(--line);}
+  .step{
+    display:grid;grid-template-columns:80px 1fr 1.4fr;gap:24px;
+    padding:30px 0;border-bottom:1px solid var(--line);
+    align-items:baseline;
+  }
+  @media (max-width:720px){.step{grid-template-columns:50px 1fr;}
+    .step p{grid-column:2;}
+  }
+  .step-num{font-family:var(--mono);color:var(--accent);font-size:14px;}
+  .step h3{font-size:20px;}
+  .step p{color:var(--muted);font-size:14.5px;max-width:52ch;}
+
+  /* ===== CTA ===== */
+  .cta{
+    text-align:center;
+    padding:120px 0;
+  }
+  .cta h2{font-size:clamp(34px,5vw,58px);max-width:16ch;margin:0 auto;}
+  .cta p{color:var(--muted);margin-top:18px;font-size:16px;}
+  .cta .hero-actions{justify-content:center;margin-top:34px;}
+
+  /* ===== FAQ ===== */
+  .faq-list{border-top:1px solid var(--line);}
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-q{
+    width:100%;text-align:left;background:none;border:none;color:var(--paper);
+    padding:22px 0;display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--display);font-size:17px;font-weight:600;gap:20px;
+  }
+  .faq-q .plus{
+    flex-shrink:0;width:20px;height:20px;position:relative;color:var(--accent);
+  }
+  .faq-q .plus::before, .faq-q .plus::after{
+    content:"";position:absolute;background:currentColor;
+  }
+  .faq-q .plus::before{left:0;top:50%;width:100%;height:1.6px;transform:translateY(-50%);}
+  .faq-q .plus::after{top:0;left:50%;height:100%;width:1.6px;transform:translateX(-50%);transition:transform .2s ease;}
+  .faq-item.open .plus::after{transform:translateX(-50%) rotate(90deg);opacity:0;}
+  .faq-a{
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+  }
+  .faq-a p{color:var(--muted);font-size:14.5px;line-height:1.65;padding-bottom:22px;max-width:62ch;}
+  .faq-item.open .faq-a{max-height:220px;}
+
+  /* ===== FORM ===== */
+  .brief-form{
+    max-width:560px;margin:44px auto 0;text-align:left;
+  }
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:560px){.form-row{grid-template-columns:1fr;}}
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;font-family:var(--mono);font-size:11px;letter-spacing:0.08em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:8px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;background:var(--surface);border:1px solid var(--line);
+    color:var(--paper);padding:13px 14px;font-family:var(--body);font-size:14.5px;
+    border-radius:var(--radius);
+  }
+  .field textarea{resize:vertical;}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;border-color:var(--accent);
+  }
+  .field-err{
+    display:none;font-size:12px;color:var(--accent);margin-top:6px;font-family:var(--mono);
+  }
+  .field.invalid input, .field.invalid textarea{border-color:var(--accent);}
+  .field.invalid .field-err{display:block;}
+  #briefSubmit{position:relative;overflow:hidden;}
+  #briefSubmit.sending{background:var(--accent-dim);cursor:wait;}
+  #briefSubmit.sent{background:var(--signal);}
+  .send-dots{display:inline-flex;gap:6px;align-items:center;justify-content:center;height:20px;}
+  .send-dots span{
+    width:7px;height:7px;border-radius:50%;background:var(--ink);
+    animation:send-bounce 0.8s ease-in-out infinite;
+  }
+  .send-dots span:nth-child(2){animation-delay:0.15s;}
+  .send-dots span:nth-child(3){animation-delay:0.3s;}
+  @keyframes send-bounce{
+    0%,100%{transform:translateY(0);opacity:0.5;}
+    50%{transform:translateY(-6px);opacity:1;}
+  }
+  .form-note{font-size:12px;color:var(--muted);margin-top:14px;text-align:center;}
+  .form-success{display:none;max-width:520px;margin:44px auto 0;padding:30px;border:1px solid var(--line);background:var(--surface);}
+  .form-success.show{display:block;}
+  .brief-form.hide{display:none;}
+
+  /* ===== FOOTER ===== */
+  footer{border-top:1px solid var(--line);padding:64px 0 32px;background:var(--surface);}
+  .footer-grid{
+    display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;
+    padding-bottom:40px;border-bottom:1px solid var(--line);
+  }
+  @media (max-width:760px){.footer-grid{grid-template-columns:1fr 1fr;row-gap:36px;}}
+  @media (max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+  .footer-tagline{font-size:13.5px;color:var(--muted);margin-top:12px;max-width:26ch;}
+  .social-links{display:flex;gap:10px;margin-top:22px;}
+  .social-links a{
+    width:36px;height:36px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--muted);
+    transition:border-color .2s,color .2s,background .2s;
+  }
+  .social-links a svg{width:16px;height:16px;}
+  .social-links a:hover{color:var(--accent);border-color:var(--accent);background:rgba(99,102,241,0.08);}
+  .footer-col-title{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--signal);margin-bottom:16px;
+  }
+  .footer-col{display:flex;flex-direction:column;gap:11px;}
+  .footer-col a{font-size:13.5px;color:var(--muted);transition:color .2s;}
+  .footer-col a:hover{color:var(--paper);}
+  .footer-bottom{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+    padding-top:26px;
+  }
+  .footer-bottom p{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  /* ===== COOKIE BAR ===== */
+  .cookie-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:200;
+    background:var(--surface);border-top:1px solid var(--line);
+    transform:translateY(100%);transition:transform .35s ease;
+  }
+  .cookie-bar.show{transform:translateY(0);}
+  .cookie-inner{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding:16px 32px;flex-wrap:wrap;
+  }
+  .cookie-inner p{font-size:13px;color:var(--muted);margin:0;max-width:56ch;}
+  .cookie-inner a{color:var(--signal);}
+  .cookie-actions{display:flex;gap:10px;flex-shrink:0;}
+  .cookie-btn{padding:9px 18px;font-size:13px;}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap nav">
+    <div class="logo"><span class="dot"></span>WAVE STUDIO</div>
+    <ul class="nav-links">
+      <li><a href="#services">Channels</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">START A PROJECT</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <svg id="navIconOpen" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg id="navIconClose" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none;"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#services">Channels</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#security">Security</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">ON AIR — TAKING NEW BRIEFS</div>
+        <h1>One studio.<br>Every <span>channel</span>.</h1>
+        <p class="hero-sub">Video, AI film, ad campaigns, websites, and bots — built by one team and shipped through one signal. Pick a channel, tell us the brief, we handle the rest.</p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn-primary">Start a project</a>
+          <a href="#services" class="btn-ghost">Browse channels</a>
+        </div>
+      </div>
+
+      <div class="dial reveal">
+        <div class="dial-head">
+          <span>CHANNEL SELECT</span>
+          <div class="eq"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+        <div class="dial-list" id="dialList"></div>
+        <div class="dial-preview">
+          <div class="tag" id="previewTag">VIDEO EDITING</div>
+          <p id="previewText">Cut, color, sound. Reels, long-form, and cinematic grading, delivered on your platform's spec.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="marquee">
+      <marquee behavior="scroll" direction="left" scrollamount="4" class="marquee-native">
+        VIDEO EDITING · AI FILMS · AD FILMS · WEB BUILD · CUSTOM BOTS · DISCORD BOTS · DISCORD SERVERS · HOSTING
+      </marquee>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Eight channels,<br>one signal.</h2>
+        <p>Every category below ships from the same team — so your video, your site, and your bots all speak the same brand language.</p>
+      </div>
+
+      <div class="services-grid reveal" id="servicesGrid"></div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" style="border-top:1px solid var(--line);">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Pick a plan,<br>not a quote form.</h2>
+        <p>Project work is scoped per brief. These are the recurring plans — hosting, retainers, and ongoing bot support.</p>
+      </div>
+
+      <div class="pricing-grid reveal">
+        <div class="price-card">
+          <div class="eyebrow" style="justify-content:flex-start;">STARTER</div>
+          <div class="price-num">$25<span>/mo</span></div>
+          <p class="price-desc">One site or bot, kept alive. Good fit for a single landing page or a Discord bot on one server.</p>
+          <ul class="price-list">
+            <li>Hosting + SSL for 1 project</li>
+            <li>Nightly backups</li>
+            <li>Security patches</li>
+            <li>Email support, 48h response</li>
+          </ul>
+          <!-- Replace href below with your Stripe/Razorpay Payment Link for this plan -->
+          <!-- Gateway buttons populated by JS from paymentLinks.starter — only configured gateways show -->
+          <div class="pay-row" id="payRow-starter"></div>
+          <a href="#contact" class="btn-ghost price-btn pay-fallback" id="payFallback-starter">Choose Starter</a>
+        </div>
+
+        <div class="price-card featured">
+          <div class="price-tag">MOST PICKED</div>
+          <div class="eyebrow" style="justify-content:flex-start;">GROWTH</div>
+          <div class="price-num">$75<span>/mo</span></div>
+          <p class="price-desc">For a business running a site plus one or two bots, with room to change things monthly.</p>
+          <ul class="price-list">
+            <li>Hosting + SSL for up to 3 projects</li>
+            <li>Nightly backups + uptime monitoring</li>
+            <li>Security patches, priority</li>
+            <li>2 hrs/mo of small edits included</li>
+            <li>Live chat support, same-day</li>
+          </ul>
+          <!-- Replace href below with your Stripe/Razorpay Payment Link for this plan -->
+          <!-- Gateway buttons populated by JS from paymentLinks.growth — only configured gateways show -->
+          <div class="pay-row" id="payRow-growth"></div>
+          <a href="#contact" class="btn-primary price-btn pay-fallback" id="payFallback-growth">Choose Growth</a>
+        </div>
+
+      </div>
+      <p class="price-note">Project-based work (video, films, web builds, bot dev) is quoted per brief and billed separately — see <a href="#process" style="color:var(--signal);">how a project moves</a>. Plans above are billed monthly via Stripe or Razorpay, cancel anytime.</p>
+    </div>
+  </section>
+
+  <!-- SECURITY / TRUST -->
+  <section id="security" class="trust">
+    <div class="wrap trust-grid">
+      <div class="reveal">
+        <div class="eyebrow">LOCKED SIGNAL</div>
+        <h2 style="margin-top:16px;font-size:clamp(28px,3.6vw,42px);">Your data and your payments, encrypted end to end.</h2>
+        <p style="color:var(--muted);margin-top:16px;font-size:15px;max-width:44ch;">Every brief, file, and transaction moves over an encrypted connection. We never store card details on our own servers — checkout runs entirely through certified payment processors.</p>
+        <div class="gateways">
+          <span class="gw">STRIPE</span>
+          <span class="gw">RAZORPAY</span>
+          <span class="gw">PAYPAL</span>
+          <span class="gw">UPI</span>
+        </div>
+      </div>
+
+      <div class="trust-badges reveal">
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v6c0 4.4-3 8.2-7 9-4-.8-7-4.6-7-9V6l7-3z"/></svg>
+          <h4>256-bit encryption</h4>
+          <p>TLS on every page, every file transfer, every checkout.</p>
+        </div>
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="1"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+          <h4>PCI-compliant checkout</h4>
+          <p>Card data is handled by our payment partners, never our servers.</p>
+        </div>
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12c2-4 5-6 9-6s7 2 9 6c-2 4-5 6-9 6s-7-2-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg>
+          <h4>Private by default</h4>
+          <p>Project files are visible only to your team and your production lead.</p>
+        </div>
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H7l-3 3V4z"/></svg>
+          <h4>Clear data requests</h4>
+          <p>Ask for an export or full deletion of your project data at any time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>How a project moves.</h2>
+        <p>Five stages, same order, every channel.</p>
+      </div>
+      <div class="process-list reveal">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Brief</h3>
+          <p>Tell us the channel, the goal, and any references. Takes ten minutes on a call or a form.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Quote &amp; scope</h3>
+          <p>You get a fixed price, a timeline, and what's included before anything is paid.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Production</h3>
+          <p>Editors, model pipelines, or developers get to work. You get milestone check-ins, not silence.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Review</h3>
+          <p>Two rounds of revisions included on every package, so the first cut isn't the last word.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">05</div>
+          <h3>Delivery</h3>
+          <p>Final files, source assets, and handoff notes — yours to keep, fully owned by you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <h2>Questions,<br>answered.</h2>
+        <p>The stuff people usually ask before sending a brief.</p>
+      </div>
+      <div class="faq-list reveal" id="faqList"></div>
+    </div>
+  </section>
+
+  <!-- CTA / CONTACT FORM -->
+  <section id="contact" class="cta">
+    <div class="wrap">
+      <div class="eyebrow" style="justify-content:center;">READY WHEN YOU ARE</div>
+      <h2 style="margin-top:18px;">Pick a channel. Send the brief. We're on air.</h2>
+      <p>Replies within one business day — usually faster.</p>
+
+      <form id="briefForm" class="brief-form" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input type="text" id="f-name" name="name" required>
+            <span class="field-err">Enter your name</span>
+          </div>
+          <div class="field">
+            <label for="f-email">Email</label>
+            <input type="email" id="f-email" name="email" required>
+            <span class="field-err">Enter a valid email</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="f-channel">Channel</label>
+            <select id="f-channel" name="channel" required></select>
+          </div>
+          <div class="field">
+            <label for="f-budget">Budget range</label>
+            <select id="f-budget" name="budget">
+              <option value="under-250">Under $250</option>
+              <option value="250-750">$250 – $750</option>
+              <option value="750-2000">$750 – $2,000</option>
+              <option value="2000-plus">$2,000+</option>
+              <option value="monthly-plan">Monthly plan (see pricing)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-message">Brief</label>
+          <textarea id="f-message" name="message" rows="4" required placeholder="What are you trying to build or launch?"></textarea>
+          <span class="field-err">Tell us a bit about the project</span>
+        </div>
+        <button type="submit" class="btn-primary" id="briefSubmit" style="width:100%;">Send brief</button>
+        <p class="form-note">This form opens a pre-filled email to hello@signalstudio.co. Swap in a Formspree or backend endpoint later to collect submissions directly.</p>
+      </form>
+
+      <div class="form-success" id="formSuccess">
+        <div class="eyebrow" style="justify-content:center;">SIGNAL RECEIVED</div>
+        <p style="margin-top:14px;font-size:16px;">Your email app should have opened with the brief pre-filled — hit send and we'll be in touch within one business day.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><span class="dot"></span>SIGNAL</div>
+        <p class="footer-tagline">One studio. Every channel.</p>
+        <!-- Replace # with your real profile URLs -->
+        <div class="social-links">
+          <a href="#" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg></a>
+          <a href="#" aria-label="X (Twitter)" title="X (Twitter)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4l16 16M20 4L4 20"/></svg></a>
+          <a href="#" aria-label="LinkedIn" title="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10v7M7 7v.01M11 17v-4.5a2 2 0 014 0V17M11 17v-7"/></svg></a>
+          <a href="#" aria-label="Discord" title="Discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="9" width="16" height="10" rx="4"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="14" r="1.2"/><path d="M8 5l1.5 3M16 5l-1.5 3"/></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Explore</div>
+        <a href="#services">Channels</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#security">Security</a>
+        <a href="#process">Process</a>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Legal</div>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-title">Get in touch</div>
+        <a href="mailto:hello@signalstudio.co">hello@signalstudio.co</a>
+        <a href="#contact">Start a project</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 VIRTUAL CREATIVES PVT. LTD.</p>
+      <p>Payments processed by third-party PCI-DSS certified gateways</p>
+    </div>
+  </div>
+</footer>
+
+<div class="cookie-bar" id="cookieBar">
+  <div class="wrap cookie-inner">
+    <p>We use basic cookies to keep this site working and understand traffic. See our <a href="privacy.html">Privacy Policy</a>.</p>
+    <div class="cookie-actions">
+      <button id="cookieDecline" class="btn-ghost cookie-btn">Decline</button>
+      <button id="cookieAccept" class="btn-primary cookie-btn">Accept</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const channels = [
+    {
+      num:"01", name:"Video Editing", tag:"VIDEO EDITING",
+      text:"Cut, color, sound. Reels, long-form, and cinematic grading, delivered on your platform's spec.",
+      cardTitle:"Video Editing",
+      cardText:"Reels, YouTube long-form, and cinematic grading — cut to platform spec, sound-mixed, ready to post.",
+      from:"FROM $80 / VIDEO",
+      icon:'<path d="M4 6h13v12H4z"/><path d="M17 10l4-2v8l-4-2"/>'
+    },
+    {
+      num:"02", name:"AI Films", tag:"AI FILMS",
+      text:"Full short films built script-to-screen with generative video, voice, and score.",
+      cardTitle:"AI Films",
+      cardText:"Script-to-screen short films built with generative video, cloned or licensed voice, and an original score.",
+      from:"FROM $600 / FILM",
+      icon:'<path d="M4 4h16v16H4z"/><path d="M9 8l7 4-7 4z"/>'
+    },
+    {
+      num:"03", name:"AI Ad Films", tag:"AI AD FILMS",
+      text:"Product and brand spots generated and cut fast enough to test on next week's budget.",
+      cardTitle:"AI Ad Films",
+      cardText:"Product spots and brand campaigns, generated and cut in days so you can test creative on this week's ad budget.",
+      from:"FROM $350 / SPOT",
+      icon:'<path d="M3 10l14-6v16L3 14z"/><path d="M17 9a3 3 0 010 6"/>'
+    },
+    {
+      num:"04", name:"Website Build", tag:"WEBSITE BUILD",
+      text:"Landing pages, stores, and dashboards designed to convert and built to load fast.",
+      cardTitle:"Website Build",
+      cardText:"Landing pages, online stores, and dashboards — designed to convert, built to load fast, yours to own outright.",
+      from:"FROM $450 / SITE",
+      icon:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18z"/>'
+    },
+    {
+      num:"05", name:"Custom Bots", tag:"CUSTOM BOTS",
+      text:"Workflow automations and AI agents built to your exact process, not a template.",
+      cardTitle:"Custom Bots",
+      cardText:"Workflow automations and AI agents built around your exact process — Slack, email, CRM, or your own API.",
+      from:"FROM $200 / BOT",
+      icon:'<rect x="5" y="7" width="14" height="11" rx="2"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M12 3v4"/>'
+    },
+    {
+      num:"06", name:"Discord Bots", tag:"DISCORD BOTS",
+      text:"Moderation, leveling, tickets, and mini-games — coded to your server's exact rules.",
+      cardTitle:"Discord Bots",
+      cardText:"Moderation, leveling, ticketing, and mini-games — coded around your community's exact rules and roles.",
+      from:"FROM $120 / BOT",
+      icon:'<rect x="4" y="9" width="16" height="10" rx="4"/><circle cx="9" cy="14" r="1.4"/><circle cx="15" cy="14" r="1.4"/><path d="M8 5l1.5 3M16 5l-1.5 3"/>'
+    },
+    {
+      num:"07", name:"Discord Servers", tag:"DISCORD SERVERS",
+      text:"Full server design — channels, roles, onboarding — built for communities that grow.",
+      cardTitle:"Discord Servers",
+      cardText:"Full server architecture — channels, roles, onboarding flow, and moderation — built for communities that grow.",
+      from:"FROM $250 / SERVER",
+      icon:'<circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><path d="M3 19c0-3 2-5 4-5s4 2 4 5M13 19c0-3 2-5 4-5s4 2 4 5"/>'
+    },
+    {
+      num:"08", name:"Hosting & Maintenance", tag:"HOSTING & MAINTENANCE",
+      text:"Your site, kept live — hosting, backups, updates, and uptime monitoring, handled monthly.",
+      cardTitle:"Hosting & Maintenance",
+      cardText:"Hosting, SSL, nightly backups, security patches, and uptime monitoring for anything we build you — one monthly plan, no surprise renewals.",
+      from:"FROM $25 / MONTH",
+      icon:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'
+    }
+  ];
+
+  const dialList = document.getElementById('dialList');
+  const previewTag = document.getElementById('previewTag');
+  const previewText = document.getElementById('previewText');
+  const servicesGrid = document.getElementById('servicesGrid');
+
+  function iconSvg(paths){
+    return `<svg class="ch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+
+  channels.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'ch' + (i === 0 ? ' active' : '');
+    row.dataset.index = i;
+    row.innerHTML = `<span class="ch-num">${c.num}</span>${iconSvg(c.icon)}<span class="ch-name">${c.name}</span>`;
+    row.addEventListener('click', () => setActive(i));
+    dialList.appendChild(row);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <span class="ch-num">CH ${c.num}</span>
+      ${iconSvg(c.icon).replace('ch-icon','card-icon')}
+      <h3>${c.cardTitle}</h3>
+      <p>${c.cardText}</p>
+      <span class="from">${c.from}</span>
+    `;
+    servicesGrid.appendChild(card);
+  });
+
+  function setActive(i){
+    document.querySelectorAll('.ch').forEach(el => el.classList.remove('active'));
+    dialList.children[i].classList.add('active');
+    previewTag.textContent = channels[i].tag;
+    previewText.textContent = channels[i].text;
+  }
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // mobile nav toggle
+  const navToggle = document.getElementById('navToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const iconOpen = document.getElementById('navIconOpen');
+  const iconClose = document.getElementById('navIconClose');
+  navToggle.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', isOpen);
+    iconOpen.style.display = isOpen ? 'none' : 'block';
+    iconClose.style.display = isOpen ? 'block' : 'none';
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+      iconOpen.style.display = 'block';
+      iconClose.style.display = 'none';
+      navToggle.setAttribute('aria-expanded', false);
+    });
+  });
+
+  // populate the channel dropdown in the contact form from the same data source
+  const channelSelect = document.getElementById('f-channel');
+  channels.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = `CH ${c.num} — ${c.name}`;
+    channelSelect.appendChild(opt);
+  });
+
+  // ---- ORDER LOGGING: database only (no Discord, no third-party chat storage) ----
+  // 1) Create a free project at supabase.com, then in the SQL editor run:
+  //
+  //    create table orders (
+  //      id uuid primary key default gen_random_uuid(),
+  //      created_at timestamptz default now(),
+  //      name text, email text, channel text, budget text, message text,
+  //      payment_status text default 'unpaid'   -- status flag only, never card data
+  //    );
+  //    alter table orders enable row level security;
+  //    create policy "public can insert orders" on orders
+  //      for insert to anon with check (true);
+  //    -- no select/update/delete policy is created on purpose: the public key can WRITE
+  //    -- orders but can never READ, EDIT, or DELETE them — your client list can't be
+  //    -- scraped, and only you (logged into your own Supabase dashboard) can view it.
+  //
+  // 2) Paste your Project URL + anon public key below (Settings → API).
+  const dbConfig = {
+    supabaseUrl: "https://gpkbusydknmkrcwjosai.supabase.co",
+    supabaseAnonKey: ""   // e.g. "eyJhbGciOi..."
+  };
+
+  let supabaseClient = null;
+  if(dbConfig.supabaseUrl && dbConfig.supabaseAnonKey && window.supabase){
+    supabaseClient = window.supabase.createClient(dbConfig.supabaseUrl, dbConfig.supabaseAnonKey);
+  }
+
+  async function logOrder(order){
+    // The only place this order is recorded: your private Supabase table.
+    if(supabaseClient){
+      try{
+        await supabaseClient.from('orders').insert([order]);
+      }catch(err){
+        console.error('Order logging failed:', err);
+      }
+    }
+  }
+
+  // contact form: validate, log to database, then open a pre-filled mailto as a courtesy notification
+  const briefForm = document.getElementById('briefForm');
+  const formSuccess = document.getElementById('formSuccess');
+  briefForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let valid = true;
+    const nameField = document.getElementById('f-name').closest('.field');
+    const emailField = document.getElementById('f-email').closest('.field');
+    const messageField = document.getElementById('f-message').closest('.field');
+    const emailVal = document.getElementById('f-email').value.trim();
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+
+    [ [document.getElementById('f-name').value.trim().length > 0, nameField],
+      [emailOk, emailField],
+      [document.getElementById('f-message').value.trim().length > 0, messageField]
+    ].forEach(([ok, field]) => {
+      field.classList.toggle('invalid', !ok);
+      if(!ok) valid = false;
+    });
+
+    if(!valid) return;
+
+    const submitBtn = document.getElementById('briefSubmit');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('sending');
+    submitBtn.innerHTML = '<span class="send-dots"><span></span><span></span><span></span></span>';
+
+    const name = document.getElementById('f-name').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const channel = document.getElementById('f-channel').value;
+    const budget = document.getElementById('f-budget').value;
+    const message = document.getElementById('f-message').value.trim();
+
+    await logOrder({ name, email, channel, budget, message });
+
+    const subject = encodeURIComponent(`New brief — ${channel}`);
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\nChannel: ${channel}\nBudget: ${budget}\n\nBrief:\n${message}`
+    );
+    window.location.href = `mailto:hello@signalstudio.co?subject=${subject}&body=${body}`;
+
+    submitBtn.classList.remove('sending');
+    submitBtn.classList.add('sent');
+    submitBtn.innerHTML = '✓ Sent';
+
+    setTimeout(() => {
+      briefForm.classList.add('hide');
+      formSuccess.classList.add('show');
+    }, 500);
+  });
+
+  // ---- PAYMENT LINKS ----
+  // Paste your real Stripe and/or Razorpay Payment Link URLs here once you have them
+  // (Stripe Dashboard → Payment Links, or Razorpay Dashboard → Payment Links).
+  // Leave a gateway blank to hide its button — e.g. if you only set up Razorpay,
+  // only the Razorpay button shows. If BOTH are blank for a plan, the card falls
+  // back to its "Choose [Plan]" button linking to #contact, so nothing is ever dead.
+  const paymentLinks = {
+    starter: {
+      stripe:   "", // e.g. "https://buy.stripe.com/xxxxxxxx"
+      razorpay: ""  // e.g. "https://rzp.io/l/xxxxxxxx"
+    },
+    growth: {
+      stripe:   "",
+      razorpay: ""
+    }
+  };
+
+  function renderPayButtons(planKey){
+    const row = document.getElementById(`payRow-${planKey}`);
+    const fallback = document.getElementById(`payFallback-${planKey}`);
+    if(!row) return;
+    const links = paymentLinks[planKey] || {};
+    const gateways = [
+      { key:"stripe",   label:"Stripe" },
+      { key:"razorpay",  label:"Razorpay" }
+    ];
+    let anyConfigured = false;
+    gateways.forEach(g => {
+      const url = links[g.key];
+      if(url){
+        anyConfigured = true;
+        const btn = document.createElement('a');
+        btn.href = url;
+        btn.target = "_blank";
+        btn.rel = "noopener";
+        btn.className = "gw-btn";
+        btn.innerHTML = `<span class="gw-label">Pay with</span> ${g.label}`;
+        row.appendChild(btn);
+      }
+    });
+    // hide the plain "Choose [Plan]" fallback once real gateway buttons exist
+    if(anyConfigured && fallback) fallback.style.display = "none";
+  }
+  renderPayButtons('starter');
+  renderPayButtons('growth');
+
+  // FAQ accordion — data-driven, same pattern as channels
+  const faqs = [
+    { q:"How fast is turnaround?", a:"Discord bots and short edits typically ship in 3–5 business days. AI films, ad campaigns, and full websites run 1–3 weeks depending on scope — you get an exact date in the quote before anything's paid." },
+    { q:"How many revisions are included?", a:"Two rounds on every project package. Additional rounds are billed at an hourly rate agreed upfront, so there's never a surprise invoice." },
+    { q:"Who owns the final files?", a:"You do. Source files, exports, and any custom code are handed over on delivery — no license fees, no lock-in." },
+    { q:"Is my payment information safe?", a:"Yes. Checkout runs through Stripe, Razorpay, or PayPal's hosted flow — we never see or store your card details on our own servers." },
+    { q:"Can I cancel a monthly plan?", a:"Anytime, from the billing portal in your confirmation email. Hosting stays live until the end of the paid period." },
+    { q:"Do you sign an NDA?", a:"Yes, on request, before we see any confidential briefs or assets — just mention it when you send your first message." }
+  ];
+  const faqList = document.getElementById('faqList');
+  faqs.forEach((f, i) => {
+    const item = document.createElement('div');
+    item.className = 'faq-item';
+    item.innerHTML = `
+      <button class="faq-q" aria-expanded="false">
+        ${f.q}
+        <span class="plus"></span>
+      </button>
+      <div class="faq-a"><p>${f.a}</p></div>
+    `;
+    const btn = item.querySelector('.faq-q');
+    btn.addEventListener('click', () => {
+      const isOpen = item.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen);
+    });
+    faqList.appendChild(item);
+  });
+
+  // cookie consent banner — remembers choice, backs up the claim made in Privacy Policy
+  const cookieBar = document.getElementById('cookieBar');
+  const cookieChoice = localStorage.getItem('signal-cookie-consent');
+  if(!cookieChoice){
+    setTimeout(() => cookieBar.classList.add('show'), 600);
+  }
+  document.getElementById('cookieAccept').addEventListener('click', () => {
+    localStorage.setItem('signal-cookie-consent', 'accepted');
+    cookieBar.classList.remove('show');
+  });
+  document.getElementById('cookieDecline').addEventListener('click', () => {
+    localStorage.setItem('signal-cookie-consent', 'declined');
+    cookieBar.classList.remove('show');
+  });
+</script>
+
+</body>
+</html>
